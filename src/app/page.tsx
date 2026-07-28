@@ -32,6 +32,8 @@ export default async function HomePage({
     const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     const dayAfter = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
     tasks = tasks.filter((t) => t.dueDate >= tomorrowStart && t.dueDate < dayAfter);
+  } else if (params.filter === "completed") {
+    tasks = tasks.filter((t) => t.status === "complete");
   }
 
   if (params.topic) {
@@ -47,7 +49,9 @@ export default async function HomePage({
               ? "Overdue"
               : params.filter === "due-tomorrow"
                 ? "Due tomorrow"
-                : params.topic ?? "All tasks"}
+                : params.filter === "completed"
+                  ? "Completed"
+                  : (params.topic ?? "All tasks")}
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {tasks.length} {tasks.length === 1 ? "task" : "tasks"}

@@ -1,8 +1,15 @@
 import Link from "next/link";
 import type { TaskWithOverdue } from "@/lib/db/tasks";
 import { STATUS_LABELS, STATUS_STYLES, formatDueDate, topicColor } from "@/lib/status";
+import { StatusPicker } from "./StatusPicker";
 
-export function TaskRow({ task }: { task: TaskWithOverdue }) {
+export function TaskRow({
+  task,
+  editableStatus = true,
+}: {
+  task: TaskWithOverdue;
+  editableStatus?: boolean;
+}) {
   return (
     <Link
       href={`/task/${task.id}`}
@@ -26,9 +33,13 @@ export function TaskRow({ task }: { task: TaskWithOverdue }) {
         <span className="text-xs text-zinc-500 dark:text-zinc-400">
           {formatDueDate(task.dueDate)}
         </span>
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[task.status]}`}>
-          {STATUS_LABELS[task.status]}
-        </span>
+        {editableStatus ? (
+          <StatusPicker taskId={task.id} status={task.status} />
+        ) : (
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[task.status]}`}>
+            {STATUS_LABELS[task.status]}
+          </span>
+        )}
       </div>
     </Link>
   );

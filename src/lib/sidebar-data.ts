@@ -4,6 +4,7 @@ import { listActive } from "./db/tasks";
 export interface SidebarData {
   overdueCount: number;
   dueTomorrowCount: number;
+  completedCount: number;
   topics: string[];
   totalActive: number;
 }
@@ -19,8 +20,9 @@ export function getSidebarData(): SidebarData {
   const dueTomorrowCount = active.filter(
     (t) => t.dueDate >= tomorrowStart && t.dueDate < dayAfterTomorrowStart,
   ).length;
+  const completedCount = active.filter((t) => t.status === "complete").length;
 
   const topics = Array.from(new Set(active.map((t) => t.topic))).sort();
 
-  return { overdueCount, dueTomorrowCount, topics, totalActive: active.length };
+  return { overdueCount, dueTomorrowCount, completedCount, topics, totalActive: active.length };
 }

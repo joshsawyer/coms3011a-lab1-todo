@@ -3,7 +3,7 @@ import { getSidebarData } from "@/lib/sidebar-data";
 import { topicColor } from "@/lib/status";
 
 export function Sidebar() {
-  const { overdueCount, dueTomorrowCount, topics, totalActive } = getSidebarData();
+  const { overdueCount, dueTomorrowCount, completedCount, topics, totalActive } = getSidebarData();
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col gap-6 bg-zinc-950 px-4 py-6 text-zinc-300">
@@ -40,6 +40,13 @@ export function Sidebar() {
       </div>
 
       <div className="mt-auto flex flex-col gap-1 border-t border-zinc-800 pt-4">
+        <SidebarLink
+          href="/?filter=completed"
+          label="Completed"
+          count={completedCount}
+          badgeClassName="bg-emerald-600/90"
+          dotClassName="bg-emerald-500"
+        />
         <SidebarLink href="/archive" label="Archive" />
       </div>
     </aside>
@@ -51,11 +58,13 @@ function SidebarLink({
   label,
   count,
   dotClassName,
+  badgeClassName = "bg-red-500/90",
 }: {
   href: string;
   label: string;
   count?: number;
   dotClassName?: string;
+  badgeClassName?: string;
 }) {
   return (
     <Link
@@ -67,7 +76,7 @@ function SidebarLink({
         {label}
       </span>
       {typeof count === "number" && count > 0 && (
-        <span className="rounded-full bg-red-500/90 px-1.5 py-0.5 text-xs font-medium text-white">
+        <span className={`rounded-full px-1.5 py-0.5 text-xs font-medium text-white ${badgeClassName}`}>
           {count}
         </span>
       )}

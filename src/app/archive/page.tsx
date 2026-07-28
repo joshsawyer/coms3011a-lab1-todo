@@ -20,7 +20,7 @@ export default function ArchivePage() {
             No archived tasks yet.
           </p>
         ) : (
-          tasks.map((task) => <TaskRow key={task.id} task={task} />)
+          tasks.map((task) => <TaskRow key={task.id} task={task} editableStatus={false} />)
         )}
       </div>
     </div>

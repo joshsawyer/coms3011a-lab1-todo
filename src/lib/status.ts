@@ -12,6 +12,12 @@ export const STATUS_STYLES: Record<TaskStatus, string> = {
   complete: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
 };
 
+export const STATUS_DOT_COLORS: Record<TaskStatus, string> = {
+  todo: "bg-zinc-400",
+  in_progress: "bg-blue-500",
+  complete: "bg-emerald-500",
+};
+
 const TOPIC_DOT_COLORS = [
   "bg-rose-500",
   "bg-indigo-500",
