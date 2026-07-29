@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tasks
 
-## Getting Started
+A local-first todo app built with Next.js and SQLite for COMS3011A Lab 1. Single user, no accounts, all data stored locally in `data/app.db`.
 
-First, run the development server:
+## Quick start
+
+Requires Node.js v20.19.6 (or any Node 20.x LTS).
 
 ```bash
+npm install
+npm run db:migrate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run the tests with:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test
+```
 
-## Learn More
+Full details — including how to reset local data and run a production build — are in [docs/running-it.md](docs/running-it.md).
 
-To learn more about Next.js, take a look at the following resources:
+## Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Third-Party Code](docs/third-party-code.md) — libraries used and why.
+- [Database Design](docs/database-design.md) — the `tasks` table and how overdue/archive are modelled.
+- [Running It](docs/running-it.md) — exact install/run/test commands.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Create, edit, and archive tasks (title, description, due date, topic). Archiving hides a task from the active list without deleting it — archived tasks remain viewable at `/archive`.
+- Task list sortable by topic, status, or due date, with dedicated sidebar shortcuts for Overdue, Due tomorrow, and Completed.
+- Three fixed statuses (Todo, In Progress, Complete), changeable inline from the task list via the status pill, or from the task's edit page.
+- Overdue tasks are visually flagged; overdue is derived from the due date and is not a selectable status.
+- All data persists in SQLite across restarts.
