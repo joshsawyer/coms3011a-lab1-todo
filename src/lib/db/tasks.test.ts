@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createDb, type AppDatabase } from "./client";
 import { runMigrations } from "./migrate";
-import { archive, create, isOverdue, listActive, listArchived } from "./tasks";
+import { archive, create, getById, isOverdue, listActive, listArchived, update } from "./tasks";
 
 let db: AppDatabase;
 
@@ -51,6 +51,83 @@ describe("isOverdue", () => {
   it("is false when the task is archived, even if overdue", () => {
     const task = { ...base, archivedAt: new Date("2025-06-01"), dueDate: new Date("2020-01-01") };
     expect(isOverdue(task, new Date("2026-01-01"))).toBe(false);
+  });
+});
+
+describe("update", () => {
+  it("persists field edits, retrievable via getById", () => {
+    const created = create(db, {
+      title: "Draft newsletter",
+      dueDate: new Date(Date.now() + 86_400_000),
+      topic: "Work",
+    });
+
+    update(db, created.id, { title: "Draft weekly newsletter", topic: "Marketing" });
+
+    const reloaded = getById(db, created.id);
+    expect(reloaded).toMatchObject({
+      title: "Draft weekly newsletter",
+      topic: "Marketing",
+    });
+  });
+
+  it("changes status, including marking a task complete", () => {
+    const created = create(db, {
+      title: "Review PR",
+      dueDate: new Date(Date.now() + 86_400_000),
+      topic: "Work",
+    });
+    expect(created.status).toBe("todo");
+
+    update(db, created.id, { status: "in_progress" });
+    expect(getById(db, created.id)?.status).toBe("in_progress");
+
+    update(db, created.id, { status: "complete" });
+    expect(getById(db, created.id)?.status).toBe("complete");
+  });
+
+  it("a completed task is never overdue, even with a past due date", () => {
+    const created = create(db, {
+      title: "Overdue but done",
+      dueDate: new Date("2020-01-01"),
+      topic: "Work",
+    });
+
+    const completed = update(db, created.id, { status: "complete" });
+    expect(completed?.overdue).toBe(false);
+  });
+});
+
+describe("listActive sorting", () => {
+  beforeEach(() => {
+    create(db, { title: "Charlie task", dueDate: new Date("2026-03-03"), topic: "Zebra" });
+    create(db, { title: "Alpha task", dueDate: new Date("2026-01-01"), topic: "Apple" });
+    create(db, { title: "Bravo task", dueDate: new Date("2026-02-02"), topic: "Mango" });
+  });
+
+  it("sorts by due date ascending by default", () => {
+    const active = listActive(db);
+    expect(active.map((t) => t.title)).toEqual(["Alpha task", "Bravo task", "Charlie task"]);
+  });
+
+  it("sorts by due date descending", () => {
+    const active = listActive(db, { sort: "dueDate", direction: "desc" });
+    expect(active.map((t) => t.title)).toEqual(["Charlie task", "Bravo task", "Alpha task"]);
+  });
+
+  it("sorts by topic ascending", () => {
+    const active = listActive(db, { sort: "topic", direction: "asc" });
+    expect(active.map((t) => t.topic)).toEqual(["Apple", "Mango", "Zebra"]);
+  });
+
+  it("sorts by status", () => {
+    const [charlie, alpha] = listActive(db, { sort: "dueDate" });
+    update(db, alpha.id, { status: "complete" });
+    update(db, charlie.id, { status: "in_progress" });
+
+    const byStatus = listActive(db, { sort: "status", direction: "asc" });
+    // "complete" < "in_progress" < "todo" alphabetically
+    expect(byStatus.map((t) => t.status)).toEqual(["complete", "in_progress", "todo"]);
   });
 });
 
