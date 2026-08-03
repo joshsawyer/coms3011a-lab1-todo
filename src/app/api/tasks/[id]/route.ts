@@ -34,6 +34,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!existing) {
     return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
+  if (existing.archivedAt) {
+    return NextResponse.json({ error: "Archived tasks cannot be edited" }, { status: 409 });
+  }
 
   const body = await request.json();
   const patch: Parameters<typeof update>[2] = {};

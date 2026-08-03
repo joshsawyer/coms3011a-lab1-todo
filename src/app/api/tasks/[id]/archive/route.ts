@@ -9,8 +9,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ error: "Invalid task id" }, { status: 400 });
   }
 
-  if (!getById(db, id)) {
+  const existing = getById(db, id);
+  if (!existing) {
     return NextResponse.json({ error: "Task not found" }, { status: 404 });
+  }
+  if (existing.archivedAt) {
+    return NextResponse.json({ error: "Task is already archived" }, { status: 409 });
   }
 
   const task = archive(db, id);

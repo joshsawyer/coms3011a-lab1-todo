@@ -1,11 +1,77 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TaskForm, parseLocalDate, type TaskFormValues } from "@/components/TaskForm";
 import type { TaskWithOverdue } from "@/lib/db/tasks";
+import { STATUS_LABELS, STATUS_STYLES, formatDueDate } from "@/lib/status";
 
 export function EditTaskClient({ task }: { task: TaskWithOverdue }) {
+  if (task.archivedAt) {
+    return <ArchivedTaskView task={task} archivedAt={task.archivedAt} />;
+  }
+
+  return <EditableTaskForm task={task} />;
+}
+
+function ArchivedTaskView({ task, archivedAt }: { task: TaskWithOverdue; archivedAt: Date }) {
+  const router = useRouter();
+
+  return (
+    <div className="flex flex-col gap-6">
+      <p className="rounded-md bg-zinc-100 px-3 py-2 text-sm text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+        This task was archived on {formatDueDate(archivedAt)} and is read-only. View it in the{" "}
+        <Link href="/archive" className="underline underline-offset-2">
+          archive
+        </Link>
+        .
+      </p>
+
+      <div className="flex flex-col gap-5">
+        <ReadOnlyField label="Title" value={task.title} />
+        <ReadOnlyField label="Description" value={task.description || "—"} />
+        <div className="grid grid-cols-2 gap-4">
+          <ReadOnlyField label="Due date" value={formatDueDate(task.dueDate)} />
+          <ReadOnlyField label="Topic" value={task.topic} />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Status
+          </span>
+          <span
+            className={`w-fit rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[task.status]}`}
+          >
+            {STATUS_LABELS[task.status]}
+          </span>
+        </div>
+      </div>
+
+      <div className="pt-2">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="rounded-md px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+        >
+          Back
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        {label}
+      </span>
+      <p className="text-sm text-zinc-900 dark:text-zinc-100">{value}</p>
+    </div>
+  );
+}
+
+function EditableTaskForm({ task }: { task: TaskWithOverdue }) {
   const router = useRouter();
   const [archiving, setArchiving] = useState(false);
   const [archiveError, setArchiveError] = useState<string | null>(null);
